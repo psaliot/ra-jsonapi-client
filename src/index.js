@@ -7,6 +7,7 @@ import {
   CREATE,
   UPDATE,
   DELETE,
+  DELETE_MANY,
   GET_MANY,
   GET_MANY_REFERENCE,
 } from './actions';
@@ -77,11 +78,14 @@ export default (apiUrl, userSettings = {}) => (type, resource, params) => {
     case UPDATE: {
       url = `${apiUrl}/${resource}/${params.id}`;
 
+      // Suppress here the id, because not conforms to the specs.
+      let prms = params.data;
+      delete prms["id"];
       const data = {
         data: {
           id: params.id,
           type: resource,
-          attributes: params.data,
+          attributes: prms,
         },
       };
 
@@ -94,7 +98,22 @@ export default (apiUrl, userSettings = {}) => (type, resource, params) => {
       url = `${apiUrl}/${resource}/${params.id}`;
       options.method = 'DELETE';
       break;
-
+      
+    case DELETE_MANY:
+      url = `${apiUrl}/${resource}/${params.id}`;
+      options.method = 'DELETE';
+      return Promise.all(
+            params.ids.map(id =>
+                    {
+                url = `${apiUrl}/${resource}/${id}`;
+                axios({ url, ...options });
+                    }
+            )
+      ).then( () =>  ({
+            data: { id: params.ids }
+              })
+      );
+  
     case GET_MANY: {
       const query = stringify({
         'filter[id]': params.ids,
