@@ -14,6 +14,7 @@ Currently these actions are supported:
 * `CREATE`
 * `UPDATE`
 * `DELETE`
+* `DELETE_MANY`
 * `GET_MANY`
 * `GET_MANY_REFERENCE`
 
